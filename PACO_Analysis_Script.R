@@ -1,4 +1,4 @@
-#### install packages ####
+#### INSTALL PACKAGES ####
 install.packages(c("TripleR", "srm", "lme4", "nlme", "plyr", "dplyr", "mlma",
                    "r2mlm", "lmerTest", "performance", "MuMIn", "truncnorm"))
 install.packages("lavaan", dependencies = TRUE)
@@ -13,7 +13,7 @@ lapply(my_packages, library, character.only = TRUE)
 library(dplyr)
 library(srm)
 
-#### import the data ####
+#### IMPORT THE DATA ####
 setwd("~/Desktop/3 PACO Project/3 PACO Data/0 Latest PACO Data")
 
 # this is the RAW data
@@ -31,7 +31,7 @@ ind_coll <- read.csv("tar_per_coll.csv")
 rel_coll <- read.csv("rel_coll.csv")
 
 
-##### CLEAN AND PREPARE DATA FOR SOCIAL RELATIONS ANALYSES #####
+##### CLEAN/PREPARE DATA FOR SRAs #####
 
 # clean the data so that perceiver, target, and group IDs are suitable for SRAs
 # remove letters in front of the group, perceiver, and target ID variables
@@ -117,7 +117,7 @@ collaboration_session$group.id <- as.numeric(as.character(collaboration_session$
 
 
 
-##### 1. SOCIAL RELATIONS ANALYSIS USING TripleR #####
+##### SRAs: HEXACO #####
 
 # in the SRM analyses below, a single indicator is used for each construct
 
@@ -355,7 +355,7 @@ rel_coll <- merged_rel_coll[c("group.id","target.id","perceiver.id",
 # names(rel_coll)[names(rel_coll) == 'selfPID'] <- 'id'
 write.csv(rel_coll, 'rel_coll.csv')
 
-#### Create final datasets with HEXACO SRA results ####
+#### Create datasets with HEXACO SRA results ####
 
 # HEXACO target and perceiver effects
 hexaco_ind <- merge(effects_conversation_phase, effects_collaboration_phase,
@@ -384,7 +384,7 @@ names(hexaco_rel)[names(hexaco_rel) == "dyad.x"] <- "dyad"
 write.csv(hexaco_rel, "hexaco_rel.csv")
 
 
-#### SRAs using two indicators for each HEXACO construct ####
+#### SRAs: HEXACO HH & HX (USING TWO INDICATORS) ####
 
 # honesty-humility
 
@@ -462,7 +462,7 @@ R_hx_coll_3 <- RR(coll_PP_honM2/coll_PP_sincM3 ~ perceiver.id * target.id | grou
                   se="LashleyBond") # honesty & sincerity
 
 
-#### SRAs for partner selection ####
+#### SRAs: PARTNER SELECTION ####
 
 ## using only the categorical selection variable
 
@@ -510,7 +510,7 @@ R_selection_coop <- RR(selection ~ perceiver.id * target.id | group.id,
 R_selection_coll <- RR(selection ~ perceiver.id * target.id | group.id,
                        data = collaboration_session, na.rm = TRUE, se="LashleyBond")
 
-#### create final datasets with SELECTION SRA results ####
+#### Create datasets with selection SRA results ####
 
 # add results of selection SRAs into one data frame (target and perceiver effects)
 
@@ -624,7 +624,7 @@ sel_rel$target.id <- as.numeric(as.character(sel_rel$target.id))
 
 write.csv(sel_rel, "sel_rel.csv") # create a .csv file of the relationship effects for selection
 
-#### SRAs for morality, sociability, competence, and liking ####
+#### SRAs: MORALITY, SOCIABILITY, COMPETENCE & LIKING ####
 
 # morality: honest, sincere, trustworthy
 # sociability: likable, friendly, sociable
@@ -700,7 +700,7 @@ R_like_coll <- RR(coll_PP_like ~ perceiver.id * target.id | group.id,
                   data = collaboration_session, na.rm = TRUE,
                   se="LashleyBond") # likable
 
-#### create final datasets with SRA results (MORALITY, SOCIABILITY, COMPETENCE, LINKING) ####
+#### Create datasets with SRA results (morality, sociability, competence, liking) ####
 
 # merge effects into one data set
 
@@ -1124,7 +1124,7 @@ write.csv(rel_like, "rel_like.csv") # create a .csv file of the relationship eff
 
 
 
-#### SRAs for willingness for future interaction ####
+#### SRAs: WILLINGNESS FOR FUTURE INTERACTION ####
 
 # willingness (only in conversation session): conv_PP_Will
 
@@ -1134,7 +1134,7 @@ R_willing
 
 
 
-#### 2. SOCIAL RELATIONS ANALYSIS USING srm ####
+#### SRAs USING srm PACKAGE ####
 
 # in the SRM analyses below, multiple indicators are used for each construct
 
@@ -1299,6 +1299,7 @@ summary(fit_cfa_hx_coll)
 
 
 
+
 #### WABA RELATIONSHIP EFFECTS: Create the datasets required for the WABA package ####
 
 remotes::install_github("bpoconnor/WABA")
@@ -1445,7 +1446,7 @@ liking_rel$dyad <- dyad_numbers
 persons <-rep(c(1,2),times=(nrow(liking_rel)/2))
 liking_rel$person <- persons
 
-#### WABA HEXACO PERSONALITY: Analyses ####
+#### WABA HEXACO: Analyses ####
 
 waba(cons_hh)
 waba(cons_he)
@@ -1576,3 +1577,259 @@ waba(competence_target)
 
 # LIKING
 waba(liking_target)
+
+#### CHECK WHETHER PARTICIPANT IDS AFFECT CONSISTENCY ESTIMATES ####
+
+## HEXACO PERSONALITY
+
+# Create a dataset that includes participant ID
+consistency <- hexaco_rel
+# global <- gsub("^.{0,4}", "", hexaco_rel$globalPID) # replace first 4 characters with empty string ""
+dyad_numbers <-rep(1:(nrow(consistency)/2),each=2)
+consistency$dyad <- dyad_numbers
+
+## HONESTY-HUMILITY
+
+# model without IDs
+model_hh_1 <- lmerTest::lmer(rel_hh_coll ~ rel_hh + (1|group.id), data = consistency)
+summary(model_hh_1)
+ranova(model_hh_1)
+
+library(performance)
+performance::icc(model_hh_1, ci = TRUE)
+performance::icc(model_hh_1, by_group = TRUE)
+
+# model with IDs
+model_hh_2 <- lmerTest::lmer(rel_hh_coll ~ rel_hh + (1 | group.id) + (1 | globalPID), data = consistency)
+summary(model_hh_2)
+ranova(model_hh_2)
+
+performance::icc(model_hh_2, ci = TRUE)
+performance::icc(model_hh_2, by_group = TRUE) # this will tell us how much fixed effect changes if ids are accounted for
+
+anova(model_hh_1, model_hh_2)
+
+# Repeat procedure for dyads as the clustering factor
+
+# model without IDs
+model_hh_3 <- lmer(rel_hh_coll ~ rel_hh + (1|group.id/dyad), data = consistency)
+summary(model_hh_3)
+ranova(model_hh_3)
+
+performance::icc(model_hh_3, ci = TRUE)
+performance::icc(model_hh_3, by_group = TRUE)
+
+# model with IDs
+model_hh_4 <- lmer(rel_hh_coll ~ rel_hh + (1|group.id/dyad) + (1|globalPID), data = consistency)
+summary(model_hh_4)
+ranova(model_hh_4)
+
+performance::icc(model_hh_4, ci = TRUE)
+performance::icc(model_hh_4, by_group = TRUE)
+
+anova(model_hh_3, model_hh_4)
+
+## EMOTIONALITY
+
+# model without IDs
+model_he_1 <- lmerTest::lmer(rel_he_coll ~ rel_he + (1|group.id), data = consistency)
+summary(model_he_1)
+ranova(model_he_1)
+
+library(performance)
+performance::icc(model_hh_1, ci = TRUE)
+performance::icc(model_hh_1, by_group = TRUE)
+
+# model with IDs
+model_he_2 <- lmerTest::lmer(rel_he_coll ~ rel_he + (1 | group.id) + (1 | globalPID), data = consistency)
+summary(model_he_2)
+ranova(model_he_2)
+
+performance::icc(model_he_2, ci = TRUE)
+performance::icc(model_he_2, by_group = TRUE) # this will tell us how much fixed effect changes if ids are accounted for
+
+anova(model_he_1, model_he_2)
+
+# Repeat procedure for dyads as the clustering factor
+
+# model without IDs
+model_he_3 <- lmer(rel_he_coll ~ rel_he + (1|group.id/dyad), data = consistency)
+summary(model_he_3)
+ranova(model_he_3)
+
+performance::icc(model_he_3, ci = TRUE)
+performance::icc(model_he_3, by_group = TRUE)
+
+# model with IDs
+model_he_4 <- lmer(rel_he_coll ~ rel_he + (1|group.id/dyad) + (1|globalPID), data = consistency)
+summary(model_he_4)
+ranova(model_he_4)
+
+performance::icc(model_he_4, ci = TRUE)
+performance::icc(model_he_4, by_group = TRUE)
+
+anova(model_he_3, model_he_4)
+
+## EXTRAVERSION
+
+# model without IDs
+model_hx_1 <- lmerTest::lmer(rel_hx_coll ~ rel_hx + (1|group.id), data = consistency)
+summary(model_hx_1)
+ranova(model_hx_1)
+
+library(performance)
+performance::icc(model_hx_1, ci = TRUE)
+performance::icc(model_hx_1, by_group = TRUE)
+
+# model with IDs
+model_hx_2 <- lmerTest::lmer(rel_hx_coll ~ rel_hx + (1 | group.id) + (1 | globalPID), data = consistency)
+summary(model_hx_2)
+ranova(model_hx_2)
+
+performance::icc(model_hx_2, ci = TRUE)
+performance::icc(model_hx_2, by_group = TRUE) # this will tell us how much fixed effect changes if ids are accounted for
+
+anova(model_hx_1, model_hx_2)
+
+# Repeat procedure for dyads as the clustering factor
+
+# model without IDs
+model_hx_3 <- lmer(rel_hx_coll ~ rel_hx + (1|group.id/dyad), data = consistency)
+summary(model_hx_3)
+ranova(model_hx_3)
+
+performance::icc(model_hx_3, ci = TRUE)
+performance::icc(model_hx_3, by_group = TRUE)
+
+# model with IDs
+model_hx_4 <- lmer(rel_hx_coll ~ rel_hx + (1|group.id/dyad) + (1|globalPID), data = consistency)
+summary(model_hx_4)
+ranova(model_hx_4)
+
+performance::icc(model_hx_4, ci = TRUE)
+performance::icc(model_hx_4, by_group = TRUE)
+
+anova(model_hx_3, model_hx_4)
+
+## AGREEABLENESS
+
+# model without IDs
+model_ha_1 <- lmerTest::lmer(rel_ha_coll ~ rel_ha + (1|group.id), data = consistency)
+summary(model_ha_1)
+ranova(model_ha_1)
+
+library(performance)
+performance::icc(model_ha_1, ci = TRUE)
+performance::icc(model_ha_1, by_group = TRUE)
+
+# model with IDs
+model_ha_2 <- lmerTest::lmer(rel_ha_coll ~ rel_ha + (1 | group.id) + (1 | globalPID), data = consistency)
+summary(model_ha_2)
+ranova(model_ha_2)
+
+performance::icc(model_ha_2, ci = TRUE)
+performance::icc(model_ha_2, by_group = TRUE) # this will tell us how much fixed effect changes if ids are accounted for
+
+anova(model_ha_1, model_ha_2)
+
+# Repeat procedure for dyads as the clustering factor
+
+# model without IDs
+model_ha_3 <- lmer(rel_ha_coll ~ rel_ha + (1|group.id/dyad), data = consistency)
+summary(model_ha_3)
+ranova(model_ha_3)
+
+performance::icc(model_ha_3, ci = TRUE)
+performance::icc(model_ha_3, by_group = TRUE)
+
+# model with IDs
+model_ha_4 <- lmer(rel_ha_coll ~ rel_ha + (1|group.id/dyad) + (1|globalPID), data = consistency)
+summary(model_ha_4)
+ranova(model_ha_4)
+
+performance::icc(model_ha_4, ci = TRUE)
+performance::icc(model_ha_4, by_group = TRUE)
+
+anova(model_ha_3, model_ha_4)
+
+## CONSCIENTIOUSNESS
+
+# model without IDs
+model_hc_1 <- lmerTest::lmer(rel_hc_coll ~ rel_hc + (1|group.id), data = consistency)
+summary(model_hc_1)
+ranova(model_hc_1)
+
+library(performance)
+performance::icc(model_hc_1, ci = TRUE)
+performance::icc(model_hc_1, by_group = TRUE)
+
+# model with IDs
+model_hc_2 <- lmerTest::lmer(rel_hc_coll ~ rel_hc + (1 | group.id) + (1 | globalPID), data = consistency)
+summary(model_hc_2)
+ranova(model_hc_2)
+
+performance::icc(model_hc_2, ci = TRUE)
+performance::icc(model_hc_2, by_group = TRUE) # this will tell us how much fixed effect changes if ids are accounted for
+
+anova(model_hc_1, model_hc_2)
+
+# Repeat procedure for dyads as the clustering factor
+
+# model without IDs
+model_hc_3 <- lmer(rel_hc_coll ~ rel_hc + (1|group.id/dyad), data = consistency)
+summary(model_hc_3)
+ranova(model_hc_3)
+
+performance::icc(model_hc_3, ci = TRUE)
+performance::icc(model_hc_3, by_group = TRUE)
+
+# model with IDs
+model_hc_4 <- lmer(rel_hc_coll ~ rel_hc + (1|group.id/dyad) + (1|globalPID), data = consistency)
+summary(model_hc_4)
+ranova(model_hc_4)
+
+performance::icc(model_hc_4, ci = TRUE)
+performance::icc(model_hc_4, by_group = TRUE)
+
+anova(model_hc_3, model_hc_4)
+
+## OPENNESS TO EXPERIENCE
+
+# model without IDs
+model_ho_1 <- lmerTest::lmer(rel_ho_coll ~ rel_ho + (1|group.id), data = consistency)
+summary(model_ho_1)
+ranova(model_ho_1)
+
+library(performance)
+performance::icc(model_ho_1, ci = TRUE)
+performance::icc(model_ho_1, by_group = TRUE)
+
+# model with IDs
+model_ho_2 <- lmerTest::lmer(rel_ho_coll ~ rel_ho + (1 | group.id) + (1 | globalPID), data = consistency)
+summary(model_ho_2)
+ranova(model_ho_2)
+
+performance::icc(model_ho_2, ci = TRUE)
+performance::icc(model_ho_2, by_group = TRUE) # this will tell us how much fixed effect changes if ids are accounted for
+
+anova(model_ho_1, model_ho_2)
+
+# Repeat procedure for dyads as the clustering factor
+
+# model without IDs
+model_ho_3 <- lmer(rel_ho_coll ~ rel_ho + (1|group.id/dyad), data = consistency)
+summary(model_ho_3)
+ranova(model_ho_3)
+
+performance::icc(model_ho_3, ci = TRUE)
+performance::icc(model_ho_3, by_group = TRUE)
+
+# model with IDs
+model_ho_4 <- lmer(rel_ho_coll ~ rel_ho + (1|group.id/dyad) + (1|globalPID), data = consistency)
+summary(model_ho_4)
+ranova(model_ho_4)
+
+performance::icc(model_ho_4, ci = TRUE)
+performance::icc(model_ho_4, by_group = TRUE)
+
+anova(model_ho_3, model_ho_4)

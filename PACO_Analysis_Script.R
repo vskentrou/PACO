@@ -455,11 +455,11 @@ R_hx_coll_1 <- RR(coll_PP_Hex_HX/coll_PP_socS2 ~ perceiver.id * target.id | grou
 
 R_hx_coll_2 <- RR(coll_PP_Hex_HH/coll_PP_sincM3 ~ perceiver.id * target.id | group.id,
                   data = collaboration_session, na.rm = TRUE, varname="honesty-humility",
-                  se="LashleyBond") # hexaco x & sincerity
+                  se="LashleyBond") # hexaco x & dominant
 
 R_hx_coll_3 <- RR(coll_PP_honM2/coll_PP_sincM3 ~ perceiver.id * target.id | group.id,
                   data = collaboration_session, na.rm = TRUE, varname="honesty-humility",
-                  se="LashleyBond") # honesty & sincerity
+                  se="LashleyBond") # sociable & dominant
 
 
 #### SRAs: PARTNER SELECTION ####
@@ -1833,3 +1833,122 @@ performance::icc(model_ho_4, ci = TRUE)
 performance::icc(model_ho_4, by_group = TRUE)
 
 anova(model_ho_3, model_ho_4)
+
+
+
+
+# HYPOTHESES TESTS --------------------------------------------------------
+
+
+#### HYPOTHESIS 1 ####
+
+## Relationship between target and relational HONESTY-HUMILITY, and partner selection for a cooperation task
+## a. Target honesty-humility is positively related to partner selection for a cooperation task
+## b. Relational honesty-humility is positively related to partner selection for a cooperation task
+
+## these relations are examined at the collaboration phase
+
+## relation between target effect for honesty-humility and target effect for partner selection
+
+
+
+
+
+#### HYPOTHESIS 2 ####
+
+## Relationship between target and relational EXTRAVERSION, and partner selection for a cooperation task
+## a. Target extraversion is positively related to partner selection for a cooperation task
+## b. Relational extraversion is positively related to partner selection for a cooperation task
+
+## these relations are examined at the collaboration phase
+
+## relation between target effect for extraversion and target effect for partner selection
+
+
+
+
+
+#### HYPOTHESIS 3 ####
+
+## Relationship between target and relational COMPETENCE, and partner selection for a cooperation task
+## a. Target competence is positively related to partner selection for a cooperation task
+## b. Relational competence is positively related to partner selection for a cooperation task
+
+## these relations are examined at the collaboration phase
+
+## relation between target effect for competence and target effect for partner selection
+
+
+
+
+
+#### HYPOTHESIS 4 ####
+
+## Moderating role of task type (trust-based versus competence-based)
+## on the relationship between HONESTY-HUMILITY and COMPETENCE, and partner selection for a cooperation task
+
+## a. The positive relation between target and relational HONESTY-HUMILITY, and partner selection is moderated by task type
+## b.	The positive relation between target and relational COMPETENCE, and partner selection is moderated by task type
+
+
+
+
+
+# RESEARCH QUESTIONS ------------------------------------------------------
+
+
+#### RESEARCH QUESTION 2
+
+## Relationship between target and relational personality
+## (emotionality, agreeableness, conscientiousness, and openness to experience)
+## and partner selection for a cooperation  task
+
+## a.	To what extent is target personality related to partner selection for a cooperative task?
+## b.	To what extent is relational personality related to partner selection for a cooperative task?
+
+
+
+
+
+#### RESEARCH QUESTION 3 ####
+
+## Moderating role of task type (trust-based versus competence-based)
+## on the relationship between target and relational personality (emotionality, agreeableness, conscientiousness, and openness to experience)
+## and partner selection for a cooperation decision task
+
+## Is the relation between target and relational personality, and partner selection moderated by task type?
+
+
+
+
+
+#### RESEARCH QUESTION 4 ####
+
+## Relationship between similarity on HONESTY-HUMILITY and OPENNESS TO EXPERIENCE, and LIKING
+## a.	To what extent is similarity on target honesty-humility and openness to experience related to liking?
+## b.	To what extent is similarity on relational honesty-humility and openness to experience related to liking?
+  
+
+
+
+
+#### RESEARCH QUESTION 5 ####
+
+# Relationship between similarity on HONESTY-HUMILITY and OPENNESS TO EXPERIENCE, and PARTNER SELECTION
+# a.	To what extent is similarity on target honesty-humility and openness to experience related to partner selection?
+# b.	To what extent is similarity on relational honesty-humility and openness to experience related to partner selection?
+
+
+
+
+
+#### RESEARCH QUESTION 6 ####
+
+## Relationship between HONESTY-HUMILITY and GIVING in a cooperative trust-based task
+## a.	To what extent is target honesty-humility related to giving in a trust-based task?
+## b.	To what extent is relational honesty-humility related to giving in a trust-based task?
+
+
+
+
+

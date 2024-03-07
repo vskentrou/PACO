@@ -1850,6 +1850,33 @@ anova(model_ho_3, model_ho_4)
 
 ## relation between target effect for honesty-humility and target effect for partner selection
 
+selection_personality <- merge(hexaco_ind, sel_tar_per, by = c("id", "group.id"),
+                               all.x = FALSE, all.y = FALSE)
+
+model1 <- lmer(sel_coll_t ~ conv_PP_Hex_HH.t + (1 | group.id), data=selection_personality)
+summary(model1)
+ranova(model1)
+
+model2 <- lmer(sel_coll_t ~ conv_PP_Hex_HH.t + (1 + conv_PP_Hex_HH.t| group.id),
+               data=selection_personality)
+summary(model2)
+ranova(model2)
+
+anova(model1, model2)
+
+# 2. target hx is related to partner selection at the collaboration phase
+
+model3 <- lmer(sel_coll_t ~ conv_PP_Hex_HX.t + (1 | group.id), data=selection_personality)
+summary(model3)
+ranova(model3)
+
+model4 <- lmer(sel_coll_t ~ conv_PP_Hex_HX.t + (1 + conv_PP_Hex_HH.t| group.id),
+               data=selection_personality)
+summary(model4)
+ranova(model4)
+
+anova(model3, model4)
+
 
 
 

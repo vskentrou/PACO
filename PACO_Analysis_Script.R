@@ -360,7 +360,7 @@ write.csv(rel_coll, 'rel_coll.csv')
 # HEXACO target and perceiver effects
 hexaco_ind <- merge(effects_conversation_phase, effects_collaboration_phase,
                     by = c("id", "group.id"), all.x = TRUE, all.y = TRUE)
-# write.csv(hexaco_ind, "hexaco_ind.csv")
+write.csv(hexaco_ind, "hexaco_ind.csv")
 
 # HEXACO relationship effects
 hexaco_rel <- merge(rel_conv, rel_coll, by = c("dyadID", "globalPID"), all.x = TRUE, all.y = TRUE)
@@ -987,7 +987,7 @@ colnames(rel_moral) <- c("group.id", "perspectiveID", "globalPID", "dyadID",
                          "rel_moral_coll")
 
 
-write.csv(rel_moral, "rel_moral.csv") # create a .csv file of the relationship effects for selection
+write.csv(rel_moral, "rel_moral.csv") # create a .csv file of the relationship effects for morality
 
 # SOCIABILITY
 
@@ -1031,7 +1031,7 @@ colnames(rel_sociab) <- c("group.id", "perspectiveID", "globalPID", "dyadID",
                           "rel_sociab_coll")
 
 
-write.csv(rel_sociab, "rel_sociab.csv") # create a .csv file of the relationship effects for selection
+write.csv(rel_sociab, "rel_sociab.csv") # create a .csv file of the relationship effects for sociability
 
 
 # COMPETENCE
@@ -1075,7 +1075,7 @@ colnames(rel_compet) <- c("group.id", "perspectiveID", "globalPID", "dyadID",
                           "otherPID", "selfPID", "rel_compet_imp", "rel_compet_conv",
                           "rel_compet_coll")
 
-write.csv(rel_compet, "rel_compet.csv") # create a .csv file of the relationship effects for selection
+write.csv(rel_compet, "rel_compet.csv") # create a .csv file of the relationship effects for competence
 
 
 # LIKING
@@ -1119,7 +1119,7 @@ colnames(rel_like) <- c("group.id", "perspectiveID", "globalPID", "dyadID",
                         "otherPID", "selfPID", "rel_like_imp", "rel_like_conv",
                         "rel_like_coll")
 
-write.csv(rel_like, "rel_like.csv") # create a .csv file of the relationship effects for selection
+write.csv(rel_like, "rel_like.csv") # create a .csv file of the relationship effects for liking
 
 
 

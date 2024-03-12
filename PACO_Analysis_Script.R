@@ -1839,6 +1839,18 @@ anova(model_ho_3, model_ho_4)
 
 # HYPOTHESES TESTS --------------------------------------------------------
 
+# setting up packages
+library(lme4) # for the analysis
+library(tidyverse) # needed for data manipulation
+library(RColorBrewer) # needed for some extra colors in graphs
+library(lmerTest) # to get p-value estimations that are not part of the standard lme4 package
+library(viridis) # to make nicer color plots
+
+# this can be used to load the dataset right away, so it's not necessary to run all the analyses above every time
+# read.csv("selection_personality.csv")
+selection_personality <- merge(hexaco_ind, sel_tar_per, by = c("id", "group.id"),
+                               all.x = FALSE, all.y = FALSE)
+
 
 #### HYPOTHESIS 1 ####
 
@@ -1850,32 +1862,71 @@ anova(model_ho_3, model_ho_4)
 
 ## relation between target effect for honesty-humility and target effect for partner selection
 
-selection_personality <- merge(hexaco_ind, sel_tar_per, by = c("id", "group.id"),
-                               all.x = FALSE, all.y = FALSE)
+# before the analysis, we can plot the relation between target hh and selection
+# without taking into account the multilevel structure of the data
+# and also add a regression line to the plot
+ggplot(data = selection_personality,
+       aes(x = conv_PP_Hex_HH.t,
+           y = sel_coll_t)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              col = "black",
+              linewidth = .5,
+              alpha = .8) + # to add regression line
+  theme_minimal() +
+  labs(title = "Relation between target honesty-humility and target partner selection")
 
-model1 <- lmer(sel_coll_t ~ conv_PP_Hex_HH.t + (1 | group.id), data=selection_personality)
+# from the graph, there seems to be a positive relation between hh and selection
+
+# we can show the multilevel structure of the data by color-coding the groups
+# and draw different regression lines for the groups in the dataset
+ggplot(data = selection_personality,
+       aes(x = conv_PP_Hex_HH.t,
+           y = sel_coll_t,
+           col = group.id,
+           group = group.id)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_color_gradientn(colours = rainbow(100)) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              linewidth = .5,
+              alpha = .5) +
+  labs(title = "Relation between target honesty-humility and target partner selection")
+
+## intercept-only model
+
+## in the first model, the intercept randomly varies across groups
+## but we do not include predictors to explain this variability
+
+# the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
+model1 <- lmer(sel_coll_t ~ 1 + (1|group.id),
+               data = selection_personality, REML = FALSE)
 summary(model1)
-ranova(model1)
 
-model2 <- lmer(sel_coll_t ~ conv_PP_Hex_HH.t + (1 + conv_PP_Hex_HH.t| group.id),
-               data=selection_personality)
+## first-level predictor
+
+# add the first-level predictor, target honesty-humility
+# for now, we assure the effect is fixed across the groups
+model2 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + (1|group.id),
+               data = selection_personality, REML = FALSE)
 summary(model2)
-ranova(model2)
+
+## first-level predictor with a random slope
+
+# include the random slope for honesty-humility
+model3 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + (1 + conv_PP_Hex_HH.t|group.id),
+               data = selection_personality, REML = FALSE)
+summary(model3) # this model fails to converge
 
 anova(model1, model2)
 
-# 2. target hx is related to partner selection at the collaboration phase
 
-model3 <- lmer(sel_coll_t ~ conv_PP_Hex_HX.t + (1 | group.id), data=selection_personality)
-summary(model3)
-ranova(model3)
 
-model4 <- lmer(sel_coll_t ~ conv_PP_Hex_HX.t + (1 + conv_PP_Hex_HH.t| group.id),
-               data=selection_personality)
-summary(model4)
-ranova(model4)
-
-anova(model3, model4)
 
 
 
@@ -1891,7 +1942,62 @@ anova(model3, model4)
 
 ## relation between target effect for extraversion and target effect for partner selection
 
+# before the analysis, we can plot the relation between target hh and selection
+# without taking into account the multilevel structure of the data
+# and also add a regression line to the plot
+ggplot(data = selection_personality,
+       aes(x = conv_PP_Hex_HX.t,
+           y = sel_coll_t)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              col = "black",
+              linewidth = .5,
+              alpha = .8) + # to add regression line
+  theme_minimal() +
+  labs(title = "Relation between target extraversion and target partner selection")
 
+# draw different-colored regression lines for the groups in the dataset
+ggplot(data = selection_personality,
+       aes(x = conv_PP_Hex_HX.t,
+           y = sel_coll_t,
+           col = group.id,
+           group = group.id)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_color_gradientn(colours = rainbow(100)) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              linewidth = .5,
+              alpha = .5) +
+  labs(title = "Relation between target extraversion and target partner selection")
+
+## intercept-only model
+
+# the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
+model1 <- lmer(sel_coll_t ~ 1 + (1|group.id),
+               data = selection_personality, REML = FALSE)
+summary(model1)
+
+## first-level predictor
+
+# add the first-level predictor, target honesty-humility
+# for now, we assure the effect is fixed across the groups
+model2 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + (1|group.id),
+               data = selection_personality, REML = FALSE)
+summary(model2)
+
+## first-level predictor with a random slope
+
+# include the random slope for honesty-humility
+model3 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + (1 + conv_PP_Hex_HH.t|group.id),
+               data = selection_personality, REML = FALSE)
+summary(model3) # this model fails to converge
+
+anova(model1, model2)
 
 
 

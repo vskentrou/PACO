@@ -1860,7 +1860,7 @@ selection_personality <- merge(hexaco_ind, sel_tar_per, by = c("id", "group.id")
 
 ## these relations are examined at the collaboration phase
 
-## relation between target effect for honesty-humility and target effect for partner selection
+## a. relation between target effect for honesty-humility and target effect for partner selection
 
 # before the analysis, we can plot the relation between target hh and selection
 # without taking into account the multilevel structure of the data
@@ -1916,6 +1916,8 @@ model2 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + (1|group.id),
                data = selection_personality, REML = FALSE)
 summary(model2)
 
+anova(model1, model2)
+
 ## first-level predictor with a random slope
 
 # include the random slope for honesty-humility
@@ -1923,13 +1925,79 @@ model3 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + (1 + conv_PP_Hex_HH.t|group.i
                data = selection_personality, REML = FALSE)
 summary(model3) # this model fails to converge
 
-anova(model1, model2)
+## b. relation between relational honesty-humility and relational partner selection
+
+# create the necessary data set
+
+rel_coll <- read.csv('rel_coll.csv') # hexaco relationship effects for the collaboration phase
+sel_rel <- read.csv("sel_rel.csv") # selection relationship effects
+
+rel_coll$perspectiveID <- gsub("^.{0,5}", "", rel_coll$perspectiveID)
+sel_rel$perspectiveID <- gsub("^.{0,4}", "", sel_rel$perspectiveID)
+
+selection_personality_rel <- merge(sel_rel, rel_coll, by = "perspectiveID",
+                                   all.x = TRUE, all.y = TRUE)
+
+selection_personality_rel <- na.omit(selection_personality_rel)
 
 
+# plot the relation between relational hh and selection
+# add a regression line to the plot
+ggplot(data = selection_personality_rel,
+       aes(x = rel_hh_coll,
+           y = rel_sel_coll)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              col = "black",
+              linewidth = .5,
+              alpha = .8) + # to add regression line
+  theme_minimal() +
+  labs(title = "Relation between relational honesty-humility and relational partner selection")
 
+# draw color-coded regression lines for the groups in the dataset
+ggplot(data = selection_personality_rel,
+       aes(x = rel_hh_coll,
+           y = rel_sel_coll,
+           col = group.id.x,
+           group = group.id.x)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_color_gradientn(colours = rainbow(100)) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              linewidth = .5,
+              alpha = .5) +
+  labs(title = "Relation between relational honesty-humility and partner selection")
 
+## intercept-only model
 
+## in the first model, the intercept randomly varies across groups
+## but we do not include predictors to explain this variability
 
+# the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
+model1_rel <- lmer(rel_sel_coll ~ 1 + (1|group.id.x),
+               data = selection_personality_rel, REML = FALSE)
+summary(model1_rel)
+
+## first-level predictor
+
+# add the first-level predictor, relational honesty-humility
+model2_rel <- lmer(rel_sel_coll ~ 1 + rel_hh_coll + (1|group.id.x),
+               data = selection_personality_rel, REML = FALSE)
+summary(model2_rel)
+
+anova(model1_rel, model2_rel)
+
+## first-level predictor with a random slope
+
+# include the random slope for relational honesty-humility
+model3_rel <- lmer(rel_sel_coll ~ 1 + rel_hh_coll + (1 + rel_hh_coll|group.id.x),
+               data = selection_personality_rel, REML = FALSE)
+summary(model3_rel) # this model fails to converge
 
 
 #### HYPOTHESIS 2 ####
@@ -1940,9 +2008,9 @@ anova(model1, model2)
 
 ## these relations are examined at the collaboration phase
 
-## relation between target effect for extraversion and target effect for partner selection
+## a. relation between target effect for extraversion and target effect for partner selection
 
-# before the analysis, we can plot the relation between target hh and selection
+# before the analysis, we can plot the relation between target hx and selection
 # without taking into account the multilevel structure of the data
 # and also add a regression line to the plot
 ggplot(data = selection_personality,
@@ -1984,21 +2052,82 @@ summary(model1)
 
 ## first-level predictor
 
-# add the first-level predictor, target honesty-humility
+# add the first-level predictor, target extraversion
 # for now, we assure the effect is fixed across the groups
-model2 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + (1|group.id),
+model4 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HX.t + (1|group.id),
                data = selection_personality, REML = FALSE)
-summary(model2)
+summary(model4)
+
+## first-level predictor with a random slope
+# include the random slope for extraversion
+model5 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HX.t + (1 + conv_PP_Hex_HX.t|group.id),
+               data = selection_personality, REML = FALSE)
+summary(model5) # this model fails to converge
+
+anova(model1, model4)
+anova(model4, model5)
+
+## b. relation between relational extraversion and relational partner selection
+
+# plot the relation between relational extraversion and selection
+# add a regression line to the plot
+ggplot(data = selection_personality_rel,
+       aes(x = rel_hx_coll,
+           y = rel_sel_coll)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              col = "black",
+              linewidth = .5,
+              alpha = .8) + # to add regression line
+  theme_minimal() +
+  labs(title = "Relation between relational extraversion and relational partner selection")
+
+# draw color-coded regression lines for the groups in the dataset
+ggplot(data = selection_personality_rel,
+       aes(x = rel_hx_coll,
+           y = rel_sel_coll,
+           col = group.id.x,
+           group = group.id.x)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_color_gradientn(colours = rainbow(100)) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              linewidth = .5,
+              alpha = .5) +
+  labs(title = "Relation between relational extraversion and partner selection")
+
+## intercept-only model
+
+## in the first model, the intercept randomly varies across groups
+## but we do not include predictors to explain this variability
+
+# the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
+model1_rel <- lmer(rel_sel_coll ~ 1 + (1|group.id.x),
+                   data = selection_personality_rel, REML = FALSE)
+summary(model1_rel)
+
+## first-level predictor
+
+# add the first-level predictor, relational honesty-humility
+model4_rel <- lmer(rel_sel_coll ~ 1 + rel_hx_coll + (1|group.id.x),
+                   data = selection_personality_rel, REML = FALSE)
+summary(model4_rel)
+
+anova(model1_rel, model4_rel)
 
 ## first-level predictor with a random slope
 
-# include the random slope for honesty-humility
-model3 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + (1 + conv_PP_Hex_HH.t|group.id),
-               data = selection_personality, REML = FALSE)
-summary(model3) # this model fails to converge
+# include the random slope for relational honesty-humility
+model5_rel <- lmer(rel_sel_coll ~ 1 + rel_hx_coll + (1 + rel_hx_coll|group.id.x),
+                   data = selection_personality_rel, REML = FALSE)
+summary(model5_rel) # this model fails to converge
 
-anova(model1, model2)
-
+anova(model4_rel, model5_rel)
 
 
 #### HYPOTHESIS 3 ####
@@ -2009,11 +2138,145 @@ anova(model1, model2)
 
 ## these relations are examined at the collaboration phase
 
-## relation between target effect for competence and target effect for partner selection
+tar_per_coll_2 <- read.csv("tar_per_coll_2.csv")
+selection_competence <- merge(tar_per_coll_2, sel_tar_per, by = c("id", "group.id"),
+                               all.x = FALSE, all.y = FALSE)
+
+## a. relation between target effect for competence and target effect for partner selection
+
+# plot the relation between target competence and selection
+# without taking into account the multilevel structure of the data
+# and add a regression line to the plot
+ggplot(data = selection_competence,
+       aes(x = coll_PP_skillC2.t,
+           y = sel_coll_t)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              col = "black",
+              linewidth = .5,
+              alpha = .8) + # to add regression line
+  theme_minimal() +
+  labs(title = "Relation between target competence and target partner selection")
+
+# draw different-colored regression lines for the groups in the dataset
+ggplot(data = selection_competence,
+       aes(x = coll_PP_skillC2.t,
+           y = sel_coll_t,
+           col = group.id,
+           group = group.id)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_color_gradientn(colours = rainbow(100)) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              linewidth = .5,
+              alpha = .5) +
+  labs(title = "Relation between target competence and target partner selection")
+
+## intercept-only model
+
+# the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
+model1 <- lmer(sel_coll_t ~ 1 + (1|group.id),
+               data = selection_personality, REML = FALSE)
+summary(model1)
+
+## first-level predictor
+
+# add the first-level predictor, target competence
+# for now, we assure the effect is fixed across the groups
+model6 <- lmer(sel_coll_t ~ 1 + coll_PP_skillC2.t + (1|group.id),
+               data = selection_competence, REML = FALSE)
+summary(model6)
+
+## first-level predictor with a random slope
+# include the random slope for competence
+model7 <- lmer(sel_coll_t ~ 1 + coll_PP_skillC2.t + (1 + coll_PP_skillC2.t|group.id),
+               data = selection_competence, REML = FALSE)
+summary(model7) # this model fails to converge
+
+anova(model1, model6)
+anova(model6, model7)
+
+## b. relation between relational competence and relational partner selection
 
 
+# create the necessary data set
+
+rel_compet <- read.csv("rel_compet.csv") # competence relationship effects
+sel_rel <- read.csv("sel_rel.csv") # selection relationship effects
+
+rel_compet <- na.omit(rel_compet)
+sel_rel <- na.omit(sel_rel)
+
+selection_competence_rel <- merge(sel_rel, rel_compet, by = "perspectiveID",
+                                   all.x = TRUE, all.y = TRUE)
+
+selection_competence_rel <- na.omit(selection_competence_rel)
 
 
+# plot the relation between relational extraversion and selection
+# add a regression line to the plot
+ggplot(data = selection_competence_rel,
+       aes(x = rel_compet_coll,
+           y = rel_sel_coll)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              col = "black",
+              linewidth = .5,
+              alpha = .8) + # to add regression line
+  theme_minimal() +
+  labs(title = "Relation between relational competence and relational partner selection")
+
+# draw color-coded regression lines for the groups in the dataset
+ggplot(data = selection_competence_rel,
+       aes(x = rel_compet_coll,
+           y = rel_sel_coll,
+           col = group.id.x,
+           group = group.id.x)) +
+  geom_point(size = 1.2,
+             alpha = .8) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_color_gradientn(colours = rainbow(100)) +
+  geom_smooth(method = lm,
+              se = FALSE,
+              linewidth = .5,
+              alpha = .5) +
+  labs(title = "Relation between relational competence and partner selection")
+
+## intercept-only model
+
+## in the first model, the intercept randomly varies across groups
+## but we do not include predictors to explain this variability
+
+# the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
+model1_rel <- lmer(rel_sel_coll ~ 1 + (1|group.id.x),
+                   data = selection_competence_rel, REML = FALSE)
+summary(model1_rel)
+
+## first-level predictor
+
+# add the first-level predictor, relational honesty-humility
+model6_rel <- lmer(rel_sel_coll ~ 1 + rel_compet_coll + (1|group.id.x),
+                   data = selection_competence_rel, REML = FALSE)
+summary(model6_rel)
+
+anova(model1_rel, model6_rel)
+
+## first-level predictor with a random slope
+
+# include the random slope for relational honesty-humility
+model7_rel <- lmer(rel_sel_coll ~ 1 + rel_compet_coll + (1 + rel_compet_coll|group.id.x),
+                   data = selection_competence_rel, REML = FALSE)
+summary(model7_rel) # this model fails to converge
+
+anova(model6_rel, model7_rel)
 
 #### HYPOTHESIS 4 ####
 

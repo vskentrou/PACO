@@ -1839,6 +1839,26 @@ anova(model_ho_3, model_ho_4)
 
 # HYPOTHESES TESTS --------------------------------------------------------
 
+## The following 4 hypotheses are examined:
+
+## 1. Relationship between target and relational HONESTY-HUMILITY, and partner selection for a cooperative task
+## 1a. Target honesty-humility is positively related to partner selection for a cooperation task
+## 1b. Relational honesty-humility is positively related to partner selection for a cooperation task
+
+## 2. Relationship between target and relational EXTRAVERSION, and partner selection for a cooperative task
+## 2a. Target extraversion is positively related to partner selection for a cooperation task
+## 2b. Relational extraversion is positively related to partner selection for a cooperation task
+
+## 3. Relationship between target and relational COMPETENCE, and partner selection for a cooperation task
+## 3a. Target competence is positively related to partner selection for a cooperation task
+## 3b. Relational competence is positively related to partner selection for a cooperation task
+
+## 4. Moderating role of task type (trust-based versus competence-based)
+## on the relationship between HONESTY-HUMILITY and COMPETENCE, and PARTNER SELECTION for a cooperation task
+## 4a. The positive relation between target and relational HONESTY-HUMILITY, and partner selection is moderated by task type
+## 4b.	The positive relation between target and relational COMPETENCE, and partner selection is moderated by task type
+
+
 # setting up packages
 library(lme4) # for the analysis
 library(tidyverse) # needed for data manipulation
@@ -1852,7 +1872,7 @@ selection_personality <- merge(hexaco_ind, sel_tar_per, by = c("id", "group.id")
                                all.x = FALSE, all.y = FALSE)
 
 
-#### HYPOTHESIS 1 ####
+#### HYPOTHESIS 1A ####
 
 ## Relationship between target and relational HONESTY-HUMILITY, and partner selection for a cooperation task
 ## a. Target honesty-humility is positively related to partner selection for a cooperation task
@@ -1861,7 +1881,6 @@ selection_personality <- merge(hexaco_ind, sel_tar_per, by = c("id", "group.id")
 ## these relations are examined at the collaboration phase
 
 ## a. relation between target effect for honesty-humility and target effect for partner selection
-
 selection_personality <- merge(hexaco_ind, sel_tar_per, by = c("id", "group.id"),
                                all.x = FALSE, all.y = FALSE)
 
@@ -1914,7 +1933,7 @@ summary(model1)
 ## first-level predictor
 
 # add the first-level predictor, target honesty-humility
-# for now, we assure the effect is fixed across the groups
+# for now, we assume the effect is fixed across the groups
 model2 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + (1|group.id),
                data = selection_personality, REML = FALSE)
 summary(model2)
@@ -1923,15 +1942,16 @@ anova(model1, model2)
 
 ## first-level predictor with a random slope
 
-# include the random slope for honesty-humility
+# include the random slope for target honesty-humility
 model3 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + (1 + conv_PP_Hex_HH.t|group.id),
                data = selection_personality, REML = FALSE)
 summary(model3) # this model fails to converge
 
+#### HYPOTHESIS 1B ####
+
 ## b. relation between relational honesty-humility and relational partner selection
 
 # create the necessary data set
-
 rel_coll <- read.csv('rel_coll.csv') # hexaco relationship effects for the collaboration phase
 sel_rel <- read.csv("sel_rel.csv") # selection relationship effects
 
@@ -1944,7 +1964,7 @@ selection_personality_rel <- merge(sel_rel, rel_coll, by = "perspectiveID",
 selection_personality_rel <- na.omit(selection_personality_rel)
 
 
-# plot the relation between relational hh and selection
+# plot the relation between relational hh and partner selection
 # add a regression line to the plot
 ggplot(data = selection_personality_rel,
        aes(x = rel_hh_coll,
@@ -1978,9 +1998,6 @@ ggplot(data = selection_personality_rel,
 
 ## intercept-only model
 
-## in the first model, the intercept randomly varies across groups
-## but we do not include predictors to explain this variability
-
 # the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
 model1_rel <- lmer(rel_sel_coll ~ 1 + (1|group.id.x),
                data = selection_personality_rel, REML = FALSE)
@@ -2003,7 +2020,7 @@ model3_rel <- lmer(rel_sel_coll ~ 1 + rel_hh_coll + (1 + rel_hh_coll|group.id.x)
 summary(model3_rel) # this model fails to converge
 
 
-#### HYPOTHESIS 2 ####
+#### HYPOTHESIS 2A ####
 
 ## Relationship between target and relational EXTRAVERSION, and partner selection for a cooperation task
 ## a. Target extraversion is positively related to partner selection for a cooperation task
@@ -2013,9 +2030,8 @@ summary(model3_rel) # this model fails to converge
 
 ## a. relation between target effect for extraversion and target effect for partner selection
 
-# before the analysis, we can plot the relation between target hx and selection
-# without taking into account the multilevel structure of the data
-# and also add a regression line to the plot
+# plot the relation between target extraversion and selection
+# and add a regression line to the plot
 ggplot(data = selection_personality,
        aes(x = conv_PP_Hex_HX.t,
            y = sel_coll_t)) +
@@ -2055,13 +2071,12 @@ summary(model1)
 
 ## first-level predictor
 
-# add the first-level predictor, target extraversion
-# for now, we assure the effect is fixed across the groups
 model4 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HX.t + (1|group.id),
                data = selection_personality, REML = FALSE)
 summary(model4)
 
 ## first-level predictor with a random slope
+
 # include the random slope for extraversion
 model5 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HX.t + (1 + conv_PP_Hex_HX.t|group.id),
                data = selection_personality, REML = FALSE)
@@ -2070,9 +2085,11 @@ summary(model5) # this model fails to converge
 anova(model1, model4)
 anova(model4, model5)
 
+#### HYPOTHESIS 2B ####
+
 ## b. relation between relational extraversion and relational partner selection
 
-# plot the relation between relational extraversion and selection
+# plot the relation between relational extraversion and relational partner selection
 # add a regression line to the plot
 ggplot(data = selection_personality_rel,
        aes(x = rel_hx_coll,
@@ -2106,9 +2123,6 @@ ggplot(data = selection_personality_rel,
 
 ## intercept-only model
 
-## in the first model, the intercept randomly varies across groups
-## but we do not include predictors to explain this variability
-
 # the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
 model1_rel <- lmer(rel_sel_coll ~ 1 + (1|group.id.x),
                    data = selection_personality_rel, REML = FALSE)
@@ -2116,7 +2130,7 @@ summary(model1_rel)
 
 ## first-level predictor
 
-# add the first-level predictor, relational honesty-humility
+# add the first-level predictor, relational extraversion
 model4_rel <- lmer(rel_sel_coll ~ 1 + rel_hx_coll + (1|group.id.x),
                    data = selection_personality_rel, REML = FALSE)
 summary(model4_rel)
@@ -2125,15 +2139,14 @@ anova(model1_rel, model4_rel)
 
 ## first-level predictor with a random slope
 
-# include the random slope for relational honesty-humility
+# include the random slope for relational extraversion
 model5_rel <- lmer(rel_sel_coll ~ 1 + rel_hx_coll + (1 + rel_hx_coll|group.id.x),
                    data = selection_personality_rel, REML = FALSE)
 summary(model5_rel) # this model fails to converge
 
 anova(model4_rel, model5_rel)
 
-
-#### HYPOTHESIS 3 ####
+#### HYPOTHESIS 3A ####
 
 ## Relationship between target and relational COMPETENCE, and partner selection for a cooperation task
 ## a. Target competence is positively related to partner selection for a cooperation task
@@ -2147,8 +2160,7 @@ selection_competence <- merge(tar_per_coll_2, sel_tar_per, by = c("id", "group.i
 
 ## a. relation between target effect for competence and target effect for partner selection
 
-# plot the relation between target competence and selection
-# without taking into account the multilevel structure of the data
+# plot the relation between target competence and target partner selection
 # and add a regression line to the plot
 ggplot(data = selection_competence,
        aes(x = coll_PP_skillC2.t,
@@ -2190,12 +2202,12 @@ summary(model1)
 ## first-level predictor
 
 # add the first-level predictor, target competence
-# for now, we assure the effect is fixed across the groups
 model6 <- lmer(sel_coll_t ~ 1 + coll_PP_skillC2.t + (1|group.id),
                data = selection_competence, REML = FALSE)
 summary(model6)
 
 ## first-level predictor with a random slope
+
 # include the random slope for competence
 model7 <- lmer(sel_coll_t ~ 1 + coll_PP_skillC2.t + (1 + coll_PP_skillC2.t|group.id),
                data = selection_competence, REML = FALSE)
@@ -2203,6 +2215,8 @@ summary(model7) # this model fails to converge
 
 anova(model1, model6)
 anova(model6, model7)
+
+#### HYPOTHESIS 3B ####
 
 ## b. relation between relational competence and relational partner selection
 
@@ -2217,9 +2231,6 @@ sel_rel <- na.omit(sel_rel)
 
 selection_competence_rel <- merge(sel_rel, rel_compet, by = "perspectiveID",
                                    all.x = TRUE, all.y = TRUE)
-
-selection_competence_rel <- na.omit(selection_competence_rel)
-
 
 # plot the relation between relational competence and selection
 # add a regression line to the plot
@@ -2251,7 +2262,7 @@ ggplot(data = selection_competence_rel,
               se = FALSE,
               linewidth = .5,
               alpha = .5) +
-  labs(title = "Relation between relational competence and partner selection")
+  labs(title = "Relation between relational competence and relational partner selection")
 
 ## intercept-only model
 
@@ -2278,7 +2289,7 @@ summary(model7_rel) # this model fails to converge
 
 anova(model6_rel, model7_rel)
 
-#### HYPOTHESIS 4 ####
+#### HYPOTHESIS 4A ####
 
 ## Moderating role of task type (trust-based versus competence-based)
 ## on the relationship between HONESTY-HUMILITY and COMPETENCE, and PARTNER SELECTION for a cooperation task
@@ -2286,11 +2297,11 @@ anova(model6_rel, model7_rel)
 ## a. The positive relation between target and relational HONESTY-HUMILITY, and partner selection is moderated by task type
 ## b.	The positive relation between target and relational COMPETENCE, and partner selection is moderated by task type
 
-# a1. relation between target honesty-humility and target selection, moderated by task type
+## a1. relation between target honesty-humility and target partner selection, moderated by task type
 
 ## create the necessary dataset
 
-# target hh & target_selection: selection_personality
+# target honesty-humility & target partner selection: selection_personality
 # task type: cooperation session
 
 cooperation_session$globalPID <- gsub("^.{0,4}", "", cooperation_session$globalPID) # Replace first 5 characters with empty string ""
@@ -2313,33 +2324,31 @@ model1 <- lmer(sel_coll_t ~ 1 + (1|group.id),
                data = mod_selection_personality, REML = FALSE)
 summary(model1)
 
-na.omit(mod_selection_personality)
-
 ## first-level predictor
 
 # add the first-level predictors, target honesty-humility and task-type
-# for now, we assure the effect is fixed across the groups
 model8 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + coord_taskType + (1|group.id),
                data = mod_selection_personality, REML = FALSE)
 summary(model8)
 
 anova(model1, model8)
 
-## first-level predictor with a random slope: target hh
+## first-level predictor with a random slope: target honesty-humility
+
 # include the random slope for target honesty-humility
 model9 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + coord_taskType + (1 + conv_PP_Hex_HH.t|group.id),
                data = mod_selection_personality, REML = FALSE)
 summary(model9)
 
-# add the interaction term
+# add the interaction term (task type: competence vs warmth)
 model10 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + coord_taskType +
                   conv_PP_Hex_HH.t:coord_taskType + (1 + conv_PP_Hex_HH.t|group.id),
                 data = mod_selection_personality, REML = FALSE)
 summary(model10)
 
-# a2. relation between relational honesty-humility and relational selection, moderated by task type
+## a2. relation between relational honesty-humility and relational selection, moderated by task type
 
-# honesty-humility and selection: selection_personality_rel
+# relational honesty-humility and relational partner selection: selection_personality_rel
 # task type: cooperation session
 
 cooperation_session$perspectiveID <- gsub("^.{0,6}", "", cooperation_session$perspectiveID)
@@ -2356,29 +2365,144 @@ summary(model1_rel)
 ## first-level predictor
 
 # add the first-level predictors, relational honesty-humility and task-type
-# for now, we assure the effect is fixed across the groups
 model8_rel <- lmer(rel_sel_coll ~ 1 + rel_hh_coll + coord_taskType + (1|group.id),
                    data = mod_selection_personality_rel, REML = FALSE)
 summary(model8_rel)
 
 anova(model1_rel, model8_rel)
 
-## first-level predictor with a random slope: relational hh
+## first-level predictor with a random slope: relational honesty-humility
+
 # include the random slope for target honesty-humility
 model9_rel <- lmer(rel_sel_coll ~ 1 + rel_hh_coll + coord_taskType + (1 + rel_hh_coll|group.id),
                data = mod_selection_personality_rel, REML = FALSE)
 summary(model9_rel) # model fails to converge
 
-# add the interaction term
+# add the interaction term (task type: competence vs warmth)
 model10_rel <- lmer(rel_sel_coll ~ 1 + rel_hh_coll + coord_taskType +
                       rel_hh_coll:coord_taskType + (1 + rel_hh_coll|group.id),
                     data = mod_selection_personality_rel, REML = FALSE)
 summary(model10_rel) # model fails to converge
 
+#### HYPOTHESIS 4B ####
+
+## b.	The positive relation between target and relational COMPETENCE, and partner selection is moderated by task type
+
+## b1. relation between target competence and target partner selection, moderated by task type
+
+## create the necessary data set
+
+# target competence & target partner selection: selection_competence
+# task type: cooperation_session
+
+mod_selection_competence <- merge(selection_competence, cooperation_session,
+                                   by = c("id"), all.x = TRUE, all.y = FALSE)
+
+mod_selection_competence <- mod_selection_competence[!duplicated(mod_selection_competence$id),]
+mod_selection_competence = subset(mod_selection_competence,
+                                  select = -c(X, roundIdx,coordC_remindYN, group.id.y,
+                                              coordW_remindYN, coord_itemOrderID))
+names(mod_selection_competence)[names(mod_selection_competence) == "group.id.x"] <- "group.id"
+
+# perform the analysis
+
+# the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
+model1 <- lmer(sel_coll_t ~ 1 + (1|group.id),
+               data = mod_selection_personality, REML = FALSE)
+summary(model1)
+
+## first-level predictor
+
+# add the first-level predictors, target competence and task-type
+model11 <- lmer(sel_coll_t ~ 1 + coll_PP_skillC2.t + coord_taskType + (1|group.id),
+               data = mod_selection_competence, REML = FALSE)
+summary(model11)
+
+anova(model1, model11)
+
+## first-level predictor with a random slope: target competence
+# include the random slope for target competence
+model12 <- lmer(sel_coll_t ~ 1 + coll_PP_skillC2.t + coord_taskType + (1 + coll_PP_skillC2.t|group.id),
+                data = mod_selection_competence, REML = FALSE)
+summary(model12) # this model fails to converge
+
+# add the interaction term (target competence * task type)
+model13 <- lmer(sel_coll_t ~ 1 + coll_PP_skillC2.t + coord_taskType +
+                  coll_PP_skillC2.t:coord_taskType + (1 + coll_PP_skillC2.t|group.id),
+                data = mod_selection_competence, REML = FALSE)
+summary(model13)
+
+# b2. relation between relational competence and relational partner selection, moderated by task type
+
+## create the necessary dataset
+
+# relational competence & relational partner selection: selection_competence_rel
+# task type: cooperation_session
+
+mod_selection_competence_rel <- merge(selection_competence_rel, cooperation_session,
+                                      by = c("perspectiveID"), all.x = TRUE, all.y = FALSE)
+
+# perform the analysis
+
+# the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
+model1_rel <- lmer(rel_sel_coll ~ 1 + (1|group.id),
+                   data = mod_selection_competence_rel, REML = FALSE)
+summary(model1_rel)
+
+## first-level predictor
+
+# add the first-level predictors, relational competence and task-type
+model11_rel <- lmer(rel_sel_coll ~ 1 + rel_compet_coll + coord_taskType + (1|group.id),
+                    data = mod_selection_competence_rel, REML = FALSE)
+summary(model11_rel)
+
+anova(model1_rel, model11_rel)
+
+## first-level predictor with a random slope: relational competence
+
+# include the random slope for target competence
+model12_rel <- lmer(rel_sel_coll ~ 1 + rel_compet_coll + coord_taskType + (1 + rel_compet_coll|group.id),
+                    data = mod_selection_competence_rel, REML = FALSE)
+summary(model12_rel) # model fails to converge
+
+# add the interaction term (relational competence * task type)
+model13_rel <- lmer(rel_sel_coll ~ 1 + rel_compet_coll + coord_taskType +
+                      rel_compet_coll:coord_taskType + (1 + rel_compet_coll|group.id),
+                    data = mod_selection_competence_rel, REML = FALSE)
+summary(model13_rel) # model fails to converge
+
+
+
 # RESEARCH QUESTIONS ------------------------------------------------------
 
+## The following 5 research questions are examined:
 
-#### RESEARCH QUESTION 2
+## 2. Relationship between target and relational personality
+## (emotionality, agreeableness, conscientiousness, and openness to experience)
+## and partner selection for a cooperation  task
+## a.	To what extent is target personality related to partner selection for a cooperative task?
+## b.	To what extent is relational personality related to partner selection for a cooperative task?
+
+## 3. Moderating role of task type (trust-based versus competence-based)
+## on the relationship between target and relational personality (emotionality, agreeableness, conscientiousness, and openness to experience)
+## and partner selection for a cooperation decision task
+## Is the relation between target and relational personality, and partner selection moderated by task type?
+
+## 4. Relationship between similarity on HONESTY-HUMILITY and OPENNESS TO EXPERIENCE, and LIKING
+## a.	To what extent is similarity on target honesty-humility and openness to experience related to liking?
+## b.	To what extent is similarity on relational honesty-humility and openness to experience related to liking?
+
+## 5. Relationship between similarity on HONESTY-HUMILITY and OPENNESS TO EXPERIENCE, and PARTNER SELECTION
+## a.	To what extent is similarity on target honesty-humility and openness to experience related to partner selection?
+## b.	To what extent is similarity on relational honesty-humility and openness to experience related to partner selection?
+
+## 6. Relationship between HONESTY-HUMILITY and GIVING in a cooperative trust-based task
+## a.	To what extent is target honesty-humility related to giving in a trust-based task?
+## b.	To what extent is relational honesty-humility related to giving in a trust-based task?
+
+
+
+#### RESEARCH QUESTION 2 ####
 
 ## Relationship between target and relational personality
 ## (emotionality, agreeableness, conscientiousness, and openness to experience)

@@ -1862,6 +1862,9 @@ selection_personality <- merge(hexaco_ind, sel_tar_per, by = c("id", "group.id")
 
 ## a. relation between target effect for honesty-humility and target effect for partner selection
 
+selection_personality <- merge(hexaco_ind, sel_tar_per, by = c("id", "group.id"),
+                               all.x = FALSE, all.y = FALSE)
+
 # before the analysis, we can plot the relation between target hh and selection
 # without taking into account the multilevel structure of the data
 # and also add a regression line to the plot
@@ -2218,7 +2221,7 @@ selection_competence_rel <- merge(sel_rel, rel_compet, by = "perspectiveID",
 selection_competence_rel <- na.omit(selection_competence_rel)
 
 
-# plot the relation between relational extraversion and selection
+# plot the relation between relational competence and selection
 # add a regression line to the plot
 ggplot(data = selection_competence_rel,
        aes(x = rel_compet_coll,
@@ -2252,9 +2255,6 @@ ggplot(data = selection_competence_rel,
 
 ## intercept-only model
 
-## in the first model, the intercept randomly varies across groups
-## but we do not include predictors to explain this variability
-
 # the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
 model1_rel <- lmer(rel_sel_coll ~ 1 + (1|group.id.x),
                    data = selection_competence_rel, REML = FALSE)
@@ -2262,7 +2262,7 @@ summary(model1_rel)
 
 ## first-level predictor
 
-# add the first-level predictor, relational honesty-humility
+# add the first-level predictor, relational competence
 model6_rel <- lmer(rel_sel_coll ~ 1 + rel_compet_coll + (1|group.id.x),
                    data = selection_competence_rel, REML = FALSE)
 summary(model6_rel)
@@ -2271,7 +2271,7 @@ anova(model1_rel, model6_rel)
 
 ## first-level predictor with a random slope
 
-# include the random slope for relational honesty-humility
+# include the random slope for relational competence
 model7_rel <- lmer(rel_sel_coll ~ 1 + rel_compet_coll + (1 + rel_compet_coll|group.id.x),
                    data = selection_competence_rel, REML = FALSE)
 summary(model7_rel) # this model fails to converge
@@ -2281,14 +2281,99 @@ anova(model6_rel, model7_rel)
 #### HYPOTHESIS 4 ####
 
 ## Moderating role of task type (trust-based versus competence-based)
-## on the relationship between HONESTY-HUMILITY and COMPETENCE, and partner selection for a cooperation task
+## on the relationship between HONESTY-HUMILITY and COMPETENCE, and PARTNER SELECTION for a cooperation task
 
 ## a. The positive relation between target and relational HONESTY-HUMILITY, and partner selection is moderated by task type
 ## b.	The positive relation between target and relational COMPETENCE, and partner selection is moderated by task type
 
+# a1. relation between target honesty-humility and target selection, moderated by task type
 
+## create the necessary dataset
 
+# target hh & target_selection: selection_personality
+# task type: cooperation session
 
+cooperation_session$globalPID <- gsub("^.{0,4}", "", cooperation_session$globalPID) # Replace first 5 characters with empty string ""
+names(cooperation_session)[names(cooperation_session) == "globalPID"] <- "id"
+cooperation_session <- cooperation_session[ -c(1) ]
+
+mod_selection_personality <- merge(selection_personality, cooperation_session,
+                                   by = c("id"), all.x = TRUE, all.y = FALSE)
+
+mod_selection_personality <- mod_selection_personality[!duplicated(mod_selection_personality$id),]
+mod_selection_personality = subset(mod_selection_personality,
+                                   select = -c(roundIdx,coordC_remindYN, group.id.y,
+                                               coordW_remindYN, coord_itemOrderID))
+names(mod_selection_personality)[names(mod_selection_personality) == "group.id.x"] <- "group.id"
+
+# perform the analysis
+
+# the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
+model1 <- lmer(sel_coll_t ~ 1 + (1|group.id),
+               data = mod_selection_personality, REML = FALSE)
+summary(model1)
+
+na.omit(mod_selection_personality)
+
+## first-level predictor
+
+# add the first-level predictors, target honesty-humility and task-type
+# for now, we assure the effect is fixed across the groups
+model8 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + coord_taskType + (1|group.id),
+               data = mod_selection_personality, REML = FALSE)
+summary(model8)
+
+anova(model1, model8)
+
+## first-level predictor with a random slope: target hh
+# include the random slope for target honesty-humility
+model9 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + coord_taskType + (1 + conv_PP_Hex_HH.t|group.id),
+               data = mod_selection_personality, REML = FALSE)
+summary(model9)
+
+# add the interaction term
+model10 <- lmer(sel_coll_t ~ 1 + conv_PP_Hex_HH.t + coord_taskType +
+                  conv_PP_Hex_HH.t:coord_taskType + (1 + conv_PP_Hex_HH.t|group.id),
+                data = mod_selection_personality, REML = FALSE)
+summary(model10)
+
+# a2. relation between relational honesty-humility and relational selection, moderated by task type
+
+# honesty-humility and selection: selection_personality_rel
+# task type: cooperation session
+
+cooperation_session$perspectiveID <- gsub("^.{0,6}", "", cooperation_session$perspectiveID)
+mod_selection_personality_rel <- merge(selection_personality_rel, cooperation_session,
+                                       by = c("perspectiveID"), all.x = TRUE, all.y = FALSE)
+
+# perform the analysis
+
+# the dependent variable "selection" is predicted by an intercept and a random error term for the intercept
+model1_rel <- lmer(rel_sel_coll ~ 1 + (1|group.id),
+               data = mod_selection_personality_rel, REML = FALSE)
+summary(model1_rel)
+
+## first-level predictor
+
+# add the first-level predictors, relational honesty-humility and task-type
+# for now, we assure the effect is fixed across the groups
+model8_rel <- lmer(rel_sel_coll ~ 1 + rel_hh_coll + coord_taskType + (1|group.id),
+                   data = mod_selection_personality_rel, REML = FALSE)
+summary(model8_rel)
+
+anova(model1_rel, model8_rel)
+
+## first-level predictor with a random slope: relational hh
+# include the random slope for target honesty-humility
+model9_rel <- lmer(rel_sel_coll ~ 1 + rel_hh_coll + coord_taskType + (1 + rel_hh_coll|group.id),
+               data = mod_selection_personality_rel, REML = FALSE)
+summary(model9_rel) # model fails to converge
+
+# add the interaction term
+model10_rel <- lmer(rel_sel_coll ~ 1 + rel_hh_coll + coord_taskType +
+                      rel_hh_coll:coord_taskType + (1 + rel_hh_coll|group.id),
+                    data = mod_selection_personality_rel, REML = FALSE)
+summary(model10_rel) # model fails to converge
 
 # RESEARCH QUESTIONS ------------------------------------------------------
 
